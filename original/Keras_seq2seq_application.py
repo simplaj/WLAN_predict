@@ -2,7 +2,7 @@ from __future__ import print_function
 
 from keras.constraints import non_neg
 from keras.models import Model
-from keras.layers import Input, LSTM, Dense
+from keras.layers import Input, LSTM, Dense, Dot, Activation, Concatenate
 import numpy as np
 import pandas as pd
 from pandas import DataFrame
@@ -46,13 +46,17 @@ encoder_outputs, state_h, state_c = encoder(encoder_inputs)
 # We discard `encoder_outputs` and only keep the states.
 encoder_states = [state_h, state_c]
 
-# Set up the decoder, using `encoder_states` as initial state.
 decoder_inputs = Input(shape=(None, d_lens))
-# We set up our decoder to return full output sequences,
-# and to return internal states as well. We don't use the
-# return states in the training model, but we will use them in inference.
+
+# Attention
+attention = Dot(axes=[2, 2])([decoder_inputs, encoder_inputs])
+attention = Activation('softmax')(attention)
+context = Dot(axes=[2, 1])([attention, encoder_inputs])
+decoder_combined_context = Concatenate(axis=-1)([context, decoder_inputs])
+
+# Decoder
 decoder_lstm = LSTM(latent_dim, return_sequences=True, return_state=True, kernel_constraint=non_neg())
-decoder_outputs, _, _ = decoder_lstm(decoder_inputs,
+decoder_outputs, _, _ = decoder_lstm(decoder_combined_context,
                                      initial_state=encoder_states)
 decoder_dense = Dense(d_lens, activation='softmax', kernel_constraint=non_neg())
 decoder_outputs = decoder_dense(decoder_outputs)
@@ -69,5 +73,6 @@ model.fit([encoder_input_data, decoder_input_data], decoder_target_data,
           epochs=epochs,
           validation_split=0.2)
 
+encoder_model = Model(encoder_inputs, encoder_outputs)
 # Save model
-model.save('models/s2s_n_512.h5')
+encoder_model.save('models/s2s_n_512.h5')

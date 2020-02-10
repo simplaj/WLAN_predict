@@ -1,7 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-Tri_data = pd.read_csv("scores/score_2.csv")
+Tri_data = pd.read_csv("score_3.csv")
 tri_data = Tri_data.values
 for ii in range(4):
     begin = 6000*ii
@@ -28,5 +28,5 @@ for ii in range(4):
             end += 1000
         elif begin == 19000:
             end = 19070
-    fig.savefig('fig/five_scores_1_%d.png' % ii)
+    fig.savefig('fig/score_att_%d.png' % ii)
     plt.show()

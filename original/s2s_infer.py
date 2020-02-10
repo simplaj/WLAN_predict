@@ -35,12 +35,7 @@ for p in range(len_data):
         decoder_target_data[p, i, :] = source_seq
 model = load_model('models/s2s_n_512.h5')
 
-encoder_inputs = model.input[0]   # input_1
-encoder_outputs, state_h_enc, state_c_enc = model.layers[2].output   # lstm_1
-encoder_states = [state_h_enc, state_c_enc]
-encoder_model = Model(encoder_inputs, encoder_outputs)
-
-outputs = encoder_model.predict(encoder_input_data)
+outputs = model.predict(encoder_input_data)
 output = outputs.reshape((outputs.shape[0], outputs.shape[1]))
 save = DataFrame(output)
-save.to_csv('scores/s2s_score_n_512.csv', index=False, header=True)
+save.to_csv('scores/s2s_512_att.csv', index=False, header=True)
