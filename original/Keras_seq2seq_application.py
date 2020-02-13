@@ -66,13 +66,13 @@ decoder_outputs = decoder_dense(decoder_outputs)
 model = Model([encoder_inputs, decoder_inputs], decoder_outputs)
 
 # Run training
-model.compile(optimizer='rmsprop', loss='categorical_crossentropy',
+model.compile(optimizer='rmsprop', loss='mean_squared_error',
               metrics=['accuracy'])
 model.fit([encoder_input_data, decoder_input_data], decoder_target_data,
           batch_size=batch_size,
           epochs=epochs,
           validation_split=0.2)
-
+model.save('models/s2s_Dot_att_pre.h5')
 encoder_model = Model(encoder_inputs, encoder_outputs)
 # Save model
-encoder_model.save('models/s2s_n_512.h5')
+encoder_model.save('models/s2s_Dot_att.h5')

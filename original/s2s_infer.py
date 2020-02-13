@@ -33,9 +33,19 @@ for p in range(len_data):
         encoder_input_data[p, i, :] = source_seq
         decoder_input_data[p, i, :] = source_seq
         decoder_target_data[p, i, :] = source_seq
-model = load_model('models/s2s_n_512.h5')
+encoder_model = load_model('models/s2s_n_512.h5')
+model = load_model('models/s2s_Dot_att_pre.h5')
 
-outputs = model.predict(encoder_input_data)
-output = outputs.reshape((outputs.shape[0], outputs.shape[1]))
+scores_outputs = encoder_model.predict(encoder_input_data)
+output = scores_outputs.reshape((scores_outputs.shape[0], scores_outputs.shape[1]))
 save = DataFrame(output)
-save.to_csv('scores/s2s_512_att.csv', index=False, header=True)
+save.to_csv('scores/s2s_Dot_att.csv', index=False, header=True)
+
+outputs = model.predict([encoder_input_data, decoder_input_data])
+# _outputs = outputs.reshape((outputs.shape[0], outputs.shape[1], outputs.shape[2]))
+# _save = _outputs[ :, 0, :]
+_save = outputs.reshape((outputs.shape[0], outputs.shape[1]*outputs.shape[2]))
+print(_save.shape)
+__save = DataFrame(_save)
+__save.to_csv('pre/Dot_att.csv', index=False, header=True)
+# np.savetxt('pre/Dot_att.csv', _outputs, delimiter=',')
