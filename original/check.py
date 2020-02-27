@@ -21,7 +21,7 @@ def check(name, path):
     save = DataFrame(err_)
     save.columns = [name, name + "2"]
     save = save.sort_values(by=[name+"2", name])
-    save.to_csv('errors/errors__'+name, index=False, header=True)
+    save.to_csv('errors/errors__'+name+'.csv', index=False, header=True)
 
 
-check("s2s", 'score_3.csv')
+check("s2s", 'score_5.csv')
