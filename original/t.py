@@ -1,25 +1,12 @@
-encoding_dim = 2
+import tensorflow as tf
 
-# this is our input placeholder
-input_img = Input(shape=(len_data, 14))
-
-# 编码层
-encoded = Dense(128, activation='relu')(input_img)
-encoded = Dense(64, activation='relu')(encoded)
-encoded = Dense(10, activation='relu')(encoded)
-encoder_output = Dense(encoding_dim)(encoded)
-
-# 解码层
-decoded = Dense(10, activation='relu')(encoder_output)
-decoded = Dense(64, activation='relu')(decoded)
-decoded = Dense(128, activation='relu')(decoded)
-decoded = Dense(len_data, activation='tanh')(decoded)
-
-# 构建自编码模型
-autoencoder = Model(inputs=input_img, outputs=decoded)
-
-# 构建编码模型
-encoder = Model(inputs=input_img, outputs=encoder_output)
-
-# compile autoencoder
-autoencoder.compile(optimizer='adam', loss='mse')
+with tf.Session() as sess:
+   x = [[[1, 2, 3],
+         [4, 5, 6]],
+        [[7, 8, 9],
+         [10, 11, 12]],
+        [[13, 14, 15],
+         [16, 17, 18]]]
+   y = tf.transpose(x, [1, 0, 2])
+   z = y.eval()
+print(z[-1])

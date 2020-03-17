@@ -13,6 +13,7 @@ from pandas import *
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.cluster import DBSCAN
 from sklearn.metrics import *
+import time
 
 
 def get_random_block_from_data(data, batch_size):
@@ -91,14 +92,20 @@ vae_loss = K.mean(4*xent_loss+ kl_loss)
 vae.add_loss(vae_loss)
 vae.compile(optimizer='adam')
 vae.summary()
+vaeb = time.time()
 vae.fit(x_train,
         shuffle=True,
         epochs=epochs,
         batch_size=batch_size,
         validation_data=(x_train, None),
         verbose=2)
-encoder = Model(x, z_mean)
+vaee = time.time()
+print('train time = %f' %(vaee - vaeb))
+encoder = Model(vae.get_layer('input_1').input, vae.get_layer('dense_2').output)
+vaeb2 = time.time()
 x_test_encoded = encoder.predict(x_train)
+vaee2 = time.time()
+print('score time = %f'%(vaee2 - vaeb2))
 encoder_output = vae.predict(x_train)
 encoder_mse = mean_squared_error(x_train, encoder_output)
 encoder_mae = mean_absolute_error(x_train, encoder_output)
@@ -107,4 +114,4 @@ db = DBSCAN(eps=0.007, min_samples=5).fit(x_test_encoded)
 vae.save_weights('test21.hdf5')
 save = DataFrame(x_test_encoded)
 save.columns = ['score']
-save.to_csv('scores/vae_score.csv', index=False, header=True)
+save.to_csv('scores/vae_scores.csv', index=False, header=True)

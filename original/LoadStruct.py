@@ -24,7 +24,7 @@ class LoadData():
         datax = []; datay = []
         for i in range(len(srcData) - timeSteps): 
             datax.append(srcData[i: i + timeSteps])
-            datay.append(srcData[i + timeSteps])
+            datay.append(srcData[i+1: i + timeSteps+1])
         datax = np.array(datax)
         datay = np.array(datay)
         return datax, datay

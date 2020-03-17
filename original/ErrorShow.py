@@ -10,19 +10,21 @@ import matplotlib as mpl
 from sklearn.metrics import mean_squared_error
 
 
-def draw(predData, trueData, lr, layers, sigmod):
+def draw(predData, trueData, name):
+    i = 0
     fig = plt.figure(figsize=(16, 8))
-    for i in range(6):
+    for name in ['TI', 'TT', 'UT', 'LMS', 'CML', 'MLR']:
         # 绘制子图，2行4列，表示8个属性的预测值与实际值信息
         rmse = math.sqrt(mean_squared_error(predData[:, i], trueData[:, i]))
-        plt.subplot(int('24' + str(i+1)))
-        plt.title('The ' + str(i) + '-th column attribute (rmse : %f):' % rmse)
+        plt.subplot(int('23' + str(i+1)))
+        plt.title( name + ' (rmse : %f):' % rmse)
         label_list = ['Actual value', 'Predictive value']
         plt.xlabel('Sample number')
         plt.ylabel('Attribute value')
-        plt.plot(range(len(trueData)), trueData[:, i], c='r')
-        plt.plot(range(len(predData)), predData[:, i], c='b')
+        plt.plot(range(trueData.shape[0]), trueData[:, i], c='r')
+        plt.plot(range(predData.shape[0]), predData[:, i], c='b')
         plt.legend(label_list, loc='best')
+        i += 1
     fig.tight_layout()
-    plt.savefig('fig/result(lr=%.2f layers=%d, sigmod=%.3f).png' % (lr, layers, sigmod))  # 将图片保存到文件
+    plt.savefig('fig/'+name+'.png' )  # 将图片保存到文件
     plt.show()

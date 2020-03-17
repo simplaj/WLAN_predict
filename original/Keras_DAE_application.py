@@ -10,6 +10,7 @@ from keras import backend as K
 import numpy as np
 import pandas as pd
 from keras.constraints import non_neg
+import time
 
 # read dataset
 from pandas import DataFrame
@@ -70,16 +71,10 @@ latent = Dense(latent_dim, name='latent_vector', kernel_constraint=non_neg())(x)
 encoder = Model(inputs, latent, name='encoder')
 encoder.summary()
 
-# Build the Decoder Model
 latent_inputs = Input(shape=(latent_dim, 1), name='decoder_input')
 x = Dense(original_dim*1, kernel_constraint=non_neg())(latent_inputs)
 x = Reshape((original_dim, 1))(x)
 
-# Stack of Transposed Conv2D blocks
-# Notes:
-# 1) Use Batch Normalization before ReLU on deep networks
-# 2) Use UpSampling2D as alternative to strides>1
-# - faster but not as good as strides>1'
 outputs = Activation('sigmoid', name='decoder_output')(x)
 
 # Instantiate Decoder Model
@@ -92,16 +87,20 @@ autoencoder = Model(inputs, decoder(encoder(inputs)), name='autoencoder')
 autoencoder.summary()
 
 autoencoder.compile(loss='mse', optimizer='adam')
-
+daeb = time.time()
 # Train the autoencoder
 autoencoder.fit(x_train_noisy,
                 x_train,
                 validation_data=(x_test_noisy, x_test),
                 epochs=200,
                 batch_size=batch_size)
-
+daee = time.time()
+print('train time = %f' %(daee-daeb))
 # Predict the Autoencoder output from corrupted test images
+daeb1 = time.time()
 x_score = encoder.predict(x_train)
+daee1 = time.time()
+print('score time = %f'%(daee1 - daeb1))
 # min_max_scaler = preprocessing.MinMaxScaler()
 # x_minmax = min_max_scaler.fit_transform(x_score)
 # output_dae = np.append(x_score, original_data, axis=-1)

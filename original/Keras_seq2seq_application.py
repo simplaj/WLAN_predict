@@ -9,6 +9,8 @@ import numpy as np
 import pandas as pd
 from pandas import DataFrame
 import matplotlib.pyplot as plt
+import tensorflow as tf
+
 
 batch_size = 4  # Batch size for training.
 epochs = 200  # Number of epochs to train for.
@@ -72,6 +74,8 @@ decoder_combined_context = Attention(8, [5, 6], mask_right=False)([_Q, _K, _V])
 decoder_lstm = LSTM(latent_dim, return_sequences=True, return_state=True)
 decoder_outputs, _, _ = decoder_lstm(decoder_inputs,
                                      initial_state=encoder_states)
+hiddens = tf.transpose(decoder_outputs, [1, 0, 2])
+# decoder_outputs = hiddens[-1]
 decoder_dense = Dense(d_lens, activation='softmax')
 decoder_outputs = decoder_dense(decoder_outputs)
 
