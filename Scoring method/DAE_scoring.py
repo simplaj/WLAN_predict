@@ -15,11 +15,11 @@ import time
 # read dataset
 from pandas import DataFrame
 
-dataFrame = pd.read_csv('../data/normalization.csv')
+dataFrame = pd.read_csv('../data/simdata.csv')
 dataset = dataFrame.values
 dataset = dataset.astype('float32')
 original_data = dataset
-dataset = dataset[:, 2:]
+dataset = dataset[:, 1:]
 dataset = np.expand_dims(dataset, axis=2)
 x_train = dataset
 x_test = x_train
@@ -38,11 +38,11 @@ x_test_noisy = np.clip(x_test_noisy, 0., 1.)
 original_dim = x_train.shape[1]
 # Network parameters
 input_shape = (original_dim, 1)
-batch_size = 2560
-kernel_size = 3
+batch_size = 5120
+kernel_size = 6
 latent_dim = 1
 # Encoder/Decoder number of CNN layers and filters per layer
-layer_filters = [6, 6]
+layer_filters = [original_dim, original_dim]
 
 # Build the Autoencoder Model
 # First build the Encoder Model
@@ -106,4 +106,4 @@ print('score time = %f'%(daee1 - daeb1))
 # output_dae = np.append(x_score, original_data, axis=-1)
 save = DataFrame(x_score)
 save.columns = ['score_dae']
-save.to_csv('../scores/score_dae.csv', index=False, header=True)
+save.to_csv('../scores/score_dae_s2.csv', index=False, header=True)

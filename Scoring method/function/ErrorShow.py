@@ -12,12 +12,12 @@ from sklearn.metrics import mean_squared_error
 
 def draw(predData, trueData, name):
     i = 0
-    fig = plt.figure(figsize=(16, 8))
-    for name1 in ['TI', 'TT', 'UT', 'LMS', 'CML', 'MLR']:
-        # 绘制子图，2行4列，表示8个属性的预测值与实际值信息
+    fig = plt.figure(figsize=(24, 12))
+    for name1 in ['RP', 'TI', 'TT', 'UT', 'LMS', 'CML', 'MLR', 'RP2', 'TI2', 'TT2', 'UT2', 'LMS2', 'CML2', 'MLR2']:
+        # 绘制子图，3行4列，表示12个属性的预测值与实际值信息
         rmse = math.sqrt(mean_squared_error(predData[:, i], trueData[:, i]))
-        plt.subplot(int('23' + str(i+1)))
-        plt.title( name1 + ' (rmse : %f):' % rmse)
+        plt.subplot(2, 7, i+1)
+        plt.title(name1 + ' (rmse : %f):' % rmse)
         label_list = ['Actual value', 'Predictive value']
         plt.xlabel('Sample number')
         plt.ylabel('Attribute value')

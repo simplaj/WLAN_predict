@@ -19,17 +19,17 @@ lr = 0.08  # 学习速率
 ld = LoadStruct.LoadData(train_ratio, timeSteps, sigmod)
 encoder = LstmStruct.LstmData(ld, lstm_layers, lstm_hidden_size, timeSteps, epochs, lr)
 en_Pred, en_True,  en_score, loss, pre_scores = encoder.lstmWork()  # 返回预测值和实际值
-pre = en_Pred.reshape(en_Pred.shape[0], 30)
-true = en_True.reshape(en_True.shape[0], 30)
-ErrorShow.draw(pre[17066:, :], true[17066:, :], '../pre/S2s_lstm')  # 调用绘制结果图片
+pre = en_Pred.reshape(en_Pred.shape[0], 70)
+true = en_True.reshape(en_True.shape[0], 70)
+ErrorShow.draw(pre[pre.shape[0]-2000:, :], true[true.shape[0]-2000:, :], '../pre/S2s_lstm_s2')  # 调用绘制结果图片
 # print(en_states)
 # print(en_score)
 plt.plot(loss)
 plt.show()
 save = DataFrame(en_score.reshape([en_score.shape[0], en_score.shape[1]*en_score.shape[2]]))
-save.to_csv('../scores/score_lstm.csv', header=True, index=False)
+save.to_csv('../scores/score_lstm_s2.csv', header=True, index=False)
 save2 = DataFrame(pre_scores.reshape([pre_scores.shape[0], pre_scores.shape[1]*pre_scores.shape[2]]))
-save2.to_csv('../pre/score_lstm.csv', header=True, index=False)
+save2.to_csv('../pre/score_lstm_s2.csv', header=True, index=False)
 
-combine.combine('../scores/score_lstm.csv', '../pre/score_lstm.csv', '../scores/scores_lstm.csv')
-five_show.draw('../scores/scores_lstm.csv','../fig/scores_lstm.csv')
+# combine.combine('../scores/score_lstm_s.csv', '../pre/score_lstm_s.csv', '../scores/scores_lstm_s.csv')
+# five_show.draw('../scores/scores_lstm_S.csv','../fig/scores_lstm_s.csv')

@@ -21,9 +21,9 @@ def get_random_block_from_data(data, batch_size):
     return data[start_index:(start_index+batch_size)]
 
 
-batch_size = 2560
+batch_size = 5120
 latent_dim = 1
-intermediate_dim = 256
+intermediate_dim = 512
 epochs = 200
 epsilon_std = 1.0
 neg = 0.3
@@ -33,7 +33,7 @@ dataset = dataframe.values
 dataset = dataset.astype('float32')
 orignal_data = dataset
 
-dataframe = read_csv('../data/normalization.csv')
+dataframe = read_csv('../data/normal_sim.csv')
 dataset = dataframe.values
 dataset = dataset.astype('float32')
 
@@ -45,6 +45,7 @@ dataset[i,3] = TT
 dataset[i,4] = UT
 '''
 
+'''
 
 for i in range(orignal_data.shape[0]):
     if orignal_data[i, 2] == -1 and orignal_data[i, 3] == -1 and orignal_data[i, 4] == -1:
@@ -60,7 +61,9 @@ for i in range(orignal_data.shape[0]):
     if orignal_data[i, 2] != -1 and orignal_data[i, 3] != -1 and orignal_data[i, 4] != -1:
         label.append(5)
 label = np.array(label)
-dataset = dataset[:, 2:dataset.shape[1]]
+'''
+
+dataset = dataset[:, 2:]
 x_train = dataset
 original_dim = x_train.shape[1]
 x = Input(shape=(original_dim,))
@@ -114,4 +117,4 @@ db = DBSCAN(eps=0.007, min_samples=5).fit(x_test_encoded)
 # vae.save_weights('test21.hdf5')
 save = DataFrame(x_test_encoded)
 save.columns = ['score']
-save.to_csv('../scores/score_vae.csv', index=False, header=True)
+save.to_csv('../scores/score_vae_s.csv', index=False, header=True)

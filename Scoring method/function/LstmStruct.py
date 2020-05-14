@@ -7,18 +7,17 @@ from keras import backend as K
 import time
 
 
-
 class LstmData():
-
     tf.reset_default_graph()
+
     def __init__(self, ld, lstm_layers, lstm_hidden_size, timeSteps, epochs, lr):
         self.timeSteps = timeSteps  # LSTM输入序列数据长度
         self.lstm_layers = lstm_layers  # LSTM隐藏层层数
         self.epochs = epochs  # 训练循环周期
         self.ld = ld
-        self.lstm_input_size = 6  # LSTM输入数据的维度
+        self.lstm_input_size = 14  # LSTM输入数据的维度
         self.lstm_hidden_size = lstm_hidden_size  # LSTM隐藏层节点数
-        self.final_out_size = 6  # 预测数据的维度
+        self.final_out_size = 14  # 预测数据的维度
         self.lr = lr
         # self.states = states
         '''
@@ -71,13 +70,13 @@ class LstmData():
         hidden = hidden[0]
         '''
 
-       # input = self.attn(input_x, input_x, input_x)
+        # input = self.attn(input_x, input_x, input_x)
 
         decoder_cell = tf.contrib.rnn.LSTMCell(self.lstm_hidden_size)
         decoder_outputs, decoder_final_state = tf.nn.dynamic_rnn(
             decoder_cell, input_x,
             initial_state=encoder_final_state,
-            dtype=tf.float32,  scope="plain_decoder",
+            dtype=tf.float32, scope="plain_decoder",
         )
         hiddens = tf.transpose(decoder_outputs, [1, 0, 2])
 
@@ -88,8 +87,8 @@ class LstmData():
         # ——————————————————定义神经网络变量——————————————————
         X = tf.placeholder(tf.float32, [None, self.timeSteps, self.lstm_input_size])
         y = tf.placeholder(tf.float32, [None, self.timeSteps, self.final_out_size])
-#       batch_size = []
-#       initial_state = tf.placeholder(tf.float32, [batch_size, None])
+        #       batch_size = []
+        #       initial_state = tf.placeholder(tf.float32, [batch_size, None])
         with tf.variable_scope("rcnn", reuse=None):
             train_lstm_out, scores = self.multi_layer_dynamic_lstm(X)
             # 将LSTM最后一层最后一个时刻的隐藏层向量，通过全连接层输出8维向量，作为下一个时刻的预测值
@@ -116,14 +115,13 @@ class LstmData():
                 loss.append(mse_)
                 print(i, mse_)
             ent = time.time()
-            print('train time = %f' %(ent-stt))
-            pred2 = sess.run(testPred, feed_dict={X: np.concatenate((self.ld.trainx, self.ld.testx),axis=0),
-                                               y: np.concatenate((self.ld.trainy, self.ld.testy))})
+            print('train time = %f' % (ent - stt))
+            pred2 = sess.run(testPred, feed_dict={X: np.concatenate((self.ld.trainx, self.ld.testx), axis=0),
+                                                  y: np.concatenate((self.ld.trainy, self.ld.testy))})
             ht = time.time()
-            hid = sess.run(t_scores,feed_dict={X: np.concatenate((self.ld.trainx, self.ld.testx),axis=0),
-                                               y: np.concatenate((self.ld.trainy, self.ld.testy))})
+            hid = sess.run(t_scores, feed_dict={X: np.concatenate((self.ld.trainx, self.ld.testx), axis=0),
+                                                y: np.concatenate((self.ld.trainy, self.ld.testy))})
             he = time.time()
-            print('score time = %f' %(he-ht))
-            hid2 = sess.run(t_scores,feed_dict={X: pred2, y: pred2})
-        return pred2, np.concatenate((self.ld.trainy, self.ld.testy)),  hid, loss, hid2
-
+            print('score time = %f' % (he - ht))
+            hid2 = sess.run(t_scores, feed_dict={X: pred2, y: pred2})
+        return pred2, np.concatenate((self.ld.trainy, self.ld.testy)), hid, loss, hid2

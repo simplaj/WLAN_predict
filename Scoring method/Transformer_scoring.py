@@ -12,6 +12,7 @@ from function import five_show
 from function import LoadStruct
 from function import ErrorShow
 from pandas import DataFrame
+from tensorflow.python import Squeeze
 
 try:
     from tqdm import tqdm
@@ -50,7 +51,7 @@ class ScaledDotProductAttention():
         attn = Lambda(lambda x: K.batch_dot(x[0], x[1], axes=[2, 2]) / temper)([q, k])  # shape=(batch, q, k)
         if mask is not None:
             mmask = Lambda(lambda x: (-1e+9) * (1. - K.cast(x, 'float32')))(mask)
-           # attn = Add()([attn, mmask])
+        # attn = Add()([attn, mmask])
         attn = Activation('softmax')(attn)
         attn = self.dropout(attn)
         output = Lambda(lambda x: K.batch_dot(x[0], x[1]))([attn, v])
@@ -199,7 +200,7 @@ class SelfAttention():
         for enc_layer in self.layers[:active_layers]:
             x, att = enc_layer(x, mask)
             if return_att: atts.append(att)
-        x = Dense(1,)(x)
+        x = Dense(1, )(x)
         return (x, atts) if return_att else x
 
 
@@ -209,8 +210,9 @@ def GetPadMask(q, k):
     '''
     ones = K.expand_dims(K.ones_like(q, 'float32'), -1)
     mask = K.cast(K.expand_dims(K.not_equal(k, 0), 1), 'float32')
-    mask = K.batch_dot(ones, mask, axes=[2,1])
+    mask = K.batch_dot(ones, mask, axes=[2, 1])
     return mask
+
 
 def GetSubMask(s):
     '''
@@ -262,29 +264,46 @@ def get_loss(y_true, y_pred):
     return _loss
 
 
-d_model = 6
+def lesss(x,a):
+    return K.squeeze(x, a)
+
+
+d_model = 14
 d_inner_hid = 1
 n_head = 4
 layers = 6
 dropout = 0.1
 active_layers = 999
-
+dim = 14
 # load data
 ld = LoadStruct.LoadData(0.9, 5, 0.01)
 # build input layer
-encoder_input = Input(shape=(5, 6), dtype='float32')
-decoder_input = Input(shape=(5, 6), dtype='float32')
 
+emb = Embedding(ld.trainx.shape[0], 1)
+pos_emb = PosEncodingLayer(ld.trainx.shape[0], 1)
+encoder_input = Input(shape=(5, dim), dtype='float32')
+decoder_input = Input(shape=(5, dim), dtype='float32')
+
+add_layer = Lambda(lambda x:x[0]+x[1], output_shape=lambda x:x[0])
+
+
+en_emb = pos_emb(encoder_input)
+en_emb = Lambda(lesss, arguments={'a': 3})(en_emb)
+en_emb = add_layer([encoder_input, en_emb])
+
+
+
+# en_emb = encoder_input
 # build encoder
 encoder = SelfAttention(d_model, d_inner_hid, n_head, layers, dropout)
-enc_output = encoder(encoder_input, encoder_input, active_layers=active_layers)
+enc_output = encoder(en_emb, encoder_input, active_layers=active_layers)
 
 # build decoder
 decoder = Decoder(d_model, d_inner_hid, n_head, layers, dropout)
-dec_output = decoder(encoder_input, decoder_input, decoder_input, enc_output, active_layers=active_layers)
+dec_output = decoder(en_emb, decoder_input, encoder_input, enc_output, active_layers=active_layers)
 
 # build target layer
-target_layer = TimeDistributed(Dense(6, use_bias=False))
+target_layer = TimeDistributed(Dense(dim, use_bias=False))
 final_output = target_layer(dec_output)
 
 # build model
@@ -302,32 +321,34 @@ pre_model.metrics_tensors.append(ppl)
 
 # model training
 train_b = time.time()
-pre_model.fit([ld.trainx, ld.trainx], ld.trainy,
-              batch_size=512,
-              epochs=50)
+pre_model.fit([ld.trainx_n, ld.trainx_n], ld.trainx,
+              batch_size=5120,
+              epochs=200)
 train_e = time.time()
 train_t = train_e - train_b
-print('train time = '+ str(train_t))
+print('train time = ' + str(train_t))
 # predicting and draw the pic
 out = pre_model.predict([ld.testx, ld.testx])
-ErrorShow.draw(out.reshape(out.shape[0], 30), ld.testy.reshape(ld.testy.shape[0], 30), '../pre/transformer')
+out1 = out.reshape(out.shape[0], 70)
+true1 = ld.testy.reshape(ld.testy.shape[0], 70)
+ErrorShow.draw(out1, true1, '../pre/transformer_s911')
 # scoring
 x = np.concatenate((ld.trainx, ld.testx), axis=0)
 pre_out = pre_model.predict([x, x])
 s1b = time.time()
 scores = scores_model.predict(x)
 s1e = time.time()
-print('score time = %f' %(s1e-s1b))
+print('score time = %f' % (s1e - s1b))
 # using the predict data scoring
 s2b = time.time()
 scores2 = scores_model.predict(pre_out)
 s2e = time.time()
-print('score time = %f' %(s2e-s2b))
+print('score time = %f' % (s2e - s2b))
 # save scores
-save = DataFrame(scores.reshape([scores.shape[0], scores.shape[1]*scores.shape[2]]))
-save.to_csv('../scores/score_trans.csv', header=True, index=False)
-save2 = DataFrame(scores2.reshape([scores2.shape[0], scores2.shape[1]*scores2.shape[2]]))
-save2.to_csv('../pre/score_trans.csv', header=True, index=False)
+save = DataFrame(scores.reshape([scores.shape[0], scores.shape[1] * scores.shape[2]]))
+save.to_csv('../scores/score_trans_s2.csv', header=True, index=False)
+save2 = DataFrame(scores2.reshape([scores2.shape[0], scores2.shape[1] * scores2.shape[2]]))
+save2.to_csv('../pre/score_trans_s2.csv', header=True, index=False)
 # draw all the scores
-combine.combine('../scores/score_trans.csv', '../pre/score_trans.csv', '../scores/scores_trans.csv')
-five_show.draw('../scores/scores_trans.csv', '../fig/scores_trans.csv')
+# combine.combine('../scores/score_trans.csv', '../pre/score_trans.csv', '../scores/scores_trans.csv')
+#  five_show.draw('../scores/scores_trans.csv', '../fig/scores_trans.csv')
