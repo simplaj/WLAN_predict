@@ -12,6 +12,7 @@ def check(name, path):
     err_ = []
     flag = 0
     for i in range(check_data.shape[0]):
+        print(i)
         for ii in range(i):
             if check_data[ii, 2] > check_data[i, 2]:
                 print(2)
@@ -46,4 +47,4 @@ def check(name, path):
 
 for name in ['mean', 'trans', 'pre_trans', 's2s', 'pres2s', 'dae']:
     print(name + 'checking...')
-    check(name, 'scores/scores_s911.csv')
+    check(name, 'scores/csample.csv')

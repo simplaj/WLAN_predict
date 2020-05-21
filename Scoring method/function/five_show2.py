@@ -4,7 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.metrics import mean_squared_error
 
-Tri_data = pd.read_csv('../../scores/scores_s911.csv')
+Tri_data = pd.read_csv('../../scores/scores_aaa.csv')
 tri_data = Tri_data.values
 begin = 0
 length = int(tri_data.shape[0] / 3000)
@@ -29,17 +29,17 @@ for ii in range(int(length / 2) + 1):
         rmse2 = math.sqrt(mean_squared_error(tri_data[begin:end, 4], tri_data[begin:end, 5]))
 
         plt.subplot(211 + i)
-        plt.title("Scores(%d-%d lines )" % (begin, end))
-        plt.plot(trans_data1, label='trans_score')
-        plt.plot(mean_data1, label='mean_score')
+        plt.title("Scores(%d-%d lines rmse=%f )" % (begin, end,rmse2))
+        # plt.plot(trans_data1, label='trans_score')
+        # plt.plot(mean_data1, label='mean_score')
         plt.plot(s2s_data1, label='seq2seq')
-        plt.plot(dae_data1, label='dae_score')
+        # plt.plot(dae_data1, label='dae_score')
         # plt.plot(vae_data1, label='vae_score')
-        # plt.plot(pres2s_data1, label='pres2s')
+        plt.plot(pres2s_data1, label='pres2s')
         # plt.plot(pretrans_data1, label='pretrans')
         plt.legend(loc='best')
         # plt.show()
         begin = end
 
-    fig.savefig('../../fig/a91_simu_%d.png' % ii)
+    fig.savefig('../../fig/apl_%d.png' % ii)
     plt.show()

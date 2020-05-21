@@ -310,6 +310,11 @@ final_output = target_layer(dec_output)
 loss = get_loss(decoder_input, final_output)
 ppl = K.exp(loss)
 
+'''
+def get_myloss(y_true, y_pred):
+    _loss = tf.reduce_mean(tf.reduce_sum(tf.square(y_true - y_pred), 1))
+    return 0.2*_loss+0.8*loss
+'''
 # build score model
 scores_model = Model(encoder_input, enc_output)
 pre_model = Model([encoder_input, decoder_input], final_output)
@@ -321,7 +326,7 @@ pre_model.metrics_tensors.append(ppl)
 
 # model training
 train_b = time.time()
-pre_model.fit([ld.trainx_n, ld.trainx_n], ld.trainx,
+pre_model.fit([ld.trainx_n, ld.trainx_n], ld.trainy,
               batch_size=5120,
               epochs=200)
 train_e = time.time()
